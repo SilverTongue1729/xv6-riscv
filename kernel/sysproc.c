@@ -108,3 +108,10 @@ sys_waitx(void)
     return -1;
   return ret;
 }
+
+
+// returns total number of calls made to read() system call
+uint64
+sys_getreadcount(void){
+  return 0;
+}
