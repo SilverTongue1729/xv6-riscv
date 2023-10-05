@@ -13,6 +13,9 @@
 #include "stat.h"
 #include "proc.h"
 
+struct spinlock readcountlock;
+uint readcount;
+
 struct devsw devsw[NDEV];
 struct {
   struct spinlock lock;
@@ -23,6 +26,7 @@ void
 fileinit(void)
 {
   initlock(&ftable.lock, "ftable");
+  initlock(&readcountlock, "readcount");
 }
 
 // Allocate a file structure.

@@ -20,7 +20,7 @@ static void freeproc(struct proc *p);
 
 extern char trampoline[]; // trampoline.S
 
-// helps ensure that wakeups of wait()ing
+// helps ensure that wakeups of wait()ingp
 // parents are not lost. helps obey the
 // memory model when using p->parent.
 // must be acquired before any p->lock.
@@ -236,7 +236,7 @@ uchar initcode[] = {
 
 // Set up first user process.
 void userinit(void)
-{
+{  
   struct proc *p;
 
   p = allocproc();

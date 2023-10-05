@@ -112,6 +112,11 @@ sys_waitx(void)
 
 // returns total number of calls made to read() system call
 uint64
-sys_getreadcount(void){
-  return 0;
+sys_getreadcount(void)
+{
+  uint64 xreadcount;
+  acquire(&readcountlock); // Acquire the lock to protect readcount
+  xreadcount = readcount; // Read the readcount variable
+  release(&readcountlock); // Release the lock
+  return xreadcount;
 }

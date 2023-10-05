@@ -71,11 +71,16 @@ sys_read(void)
   struct file *f;
   int n;
   uint64 p;
+  
+  acquire(&readcountlock); // Acquire the lock to protect readcount
+  readcount++; // Increment the readcount variable
+  release(&readcountlock); // Release the lock  
 
   argaddr(1, &p);
   argint(2, &n);
   if(argfd(0, 0, &f) < 0)
     return -1;
+    
   return fileread(f, p, n);
 }
 
