@@ -136,6 +136,7 @@ UPROGS=\
 	$U/_getreadcount\
 	$U/_test_1\
 	$U/_test_2\
+	$U/_alarmtest\
 
 
 fs.img: mkfs/mkfs README $(UPROGS)

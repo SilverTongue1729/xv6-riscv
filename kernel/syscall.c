@@ -57,6 +57,7 @@ void
 argint(int n, int *ip)
 {
   *ip = argraw(n);
+  // return 0;
 }
 
 // Retrieve an argument as a pointer.
@@ -66,6 +67,7 @@ void
 argaddr(int n, uint64 *ip)
 {
   *ip = argraw(n);
+  // return 0;
 }
 
 // Fetch the nth word-sized system call argument as a null-terminated string.
@@ -103,6 +105,8 @@ extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_waitx(void);
 extern uint64 sys_getreadcount(void);
+extern uint64 sys_sigalarm(void);
+extern uint64 sys_sigreturn(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -130,6 +134,8 @@ static uint64 (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_waitx]   sys_waitx,
 [SYS_getreadcount] sys_getreadcount,
+[SYS_sigalarm] sys_sigalarm,
+[SYS_sigreturn] sys_sigreturn,
 };
 
 void
@@ -144,8 +150,7 @@ syscall(void)
     // and store its return value in p->trapframe->a0
     p->trapframe->a0 = syscalls[num]();
   } else {
-    printf("%d %s: unknown sys call %d\n",
-            p->pid, p->name, num);
+    printf("%d %s: unknown sys call %d\n", p->pid, p->name, num);
     p->trapframe->a0 = -1;
   }
 }

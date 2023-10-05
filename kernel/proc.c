@@ -20,7 +20,7 @@ static void freeproc(struct proc *p);
 
 extern char trampoline[]; // trampoline.S
 
-// helps ensure that wakeups of wait()ingp
+// helps ensure that wakeups of wait()ing
 // parents are not lost. helps obey the
 // memory model when using p->parent.
 // must be acquired before any p->lock.
@@ -127,6 +127,13 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+  p->now_ticks = 0;
+  p->sigalarm_status = 0;
+  p->interval = 0;
+  p->handler = -1;
+  p->alarm_trapframe = ((void*)0);
+
+
   // Allocate a trapframe page.
   if ((p->trapframe = (struct trapframe *)kalloc()) == 0)
   {
@@ -152,6 +159,7 @@ found:
   p->rtime = 0;
   p->etime = 0;
   p->ctime = ticks;
+  
   return p;
 }
 
@@ -236,7 +244,7 @@ uchar initcode[] = {
 
 // Set up first user process.
 void userinit(void)
-{  
+{
   struct proc *p;
 
   p = allocproc();

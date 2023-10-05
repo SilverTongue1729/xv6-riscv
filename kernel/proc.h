@@ -119,6 +119,12 @@ struct proc
   uint rtime;                  // How long the process ran for
   uint ctime;                  // When was the process created
   uint etime;                  // When did the process exited
+  
+  uint64 handler;
+  int interval;                      // to store the value passed by syscall
+  int now_ticks;                     // how many ticks have passed
+  struct trapframe *alarm_trapframe; // cache the trapframe when timer fires
+  int sigalarm_status;
 };
 
 extern struct proc proc[NPROC];

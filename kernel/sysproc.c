@@ -109,7 +109,6 @@ sys_waitx(void)
   return ret;
 }
 
-
 // returns total number of calls made to read() system call
 uint64
 sys_getreadcount(void)
@@ -119,4 +118,34 @@ sys_getreadcount(void)
   xreadcount = readcount; // Read the readcount variable
   release(&readcountlock); // Release the lock
   return xreadcount;
+}
+
+uint64 sys_sigalarm(void) {
+  int interval;
+  uint64 fn;
+  argint(0, &interval);
+  argaddr(1, &fn);
+
+  struct proc *p = myproc();
+
+  p->sigalarm_status = 0;
+  p->interval = interval;
+  p->now_ticks = 0;
+  p->handler = fn;
+
+  return 0;
+}
+
+uint64 sys_sigreturn(void) {
+  struct proc *p = myproc();
+
+  // Restore Kernel Values
+  memmove(p->trapframe, p->alarm_trapframe, PGSIZE);
+  kfree(p->alarm_trapframe);
+
+  p->sigalarm_status = 0;
+  p->alarm_trapframe = 0;
+  p->now_ticks = 0;
+  usertrapret();
+  return 0;
 }

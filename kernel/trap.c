@@ -66,7 +66,7 @@ void usertrap(void)
   }
   else if ((which_dev = devintr()) != 0)
   {
-    // ok
+    // ok  
   }
   else
   {
@@ -79,8 +79,23 @@ void usertrap(void)
     exit(-1);
 
   // give up the CPU if this is a timer interrupt.
-  if (which_dev == 2)
+  if(which_dev == 2) {
+    // alarm
+    if (p->interval) {
+      p->now_ticks++;
+      if (!p->sigalarm_status && p->interval > 0 && p->now_ticks >= p->interval) {
+        p->now_ticks = 0;
+        p->sigalarm_status = 1;
+
+        // Save trapframe
+        p->alarm_trapframe = kalloc();
+        memmove(p->alarm_trapframe, p->trapframe, PGSIZE);
+
+        p->trapframe->epc = p->handler;
+      }
+    }
     yield();
+  }
 
   usertrapret();
 }
