@@ -120,6 +120,11 @@ struct proc
   uint ctime;                  // When was the process created
   uint etime;                  // When did the process exited
   
+  uint level;                  // priority level
+  uint in_queue;               // 0 if not in queue, 1 if in queue  
+  uint change_queue;           // time remaining in current queue
+  uint enter_ticks;            // time when process entered the queue
+  
   uint64 handler;
   int interval;                      // to store the value passed by syscall
   int now_ticks;                     // how many ticks have passed
@@ -128,3 +133,14 @@ struct proc
 };
 
 extern struct proc proc[NPROC];
+
+typedef struct
+{
+  struct proc *n[NPROC];
+  uint end;
+} deque;
+void popfront(deque *a);
+void pushback(deque *a, struct proc *x);
+struct proc *front(deque *a);
+int size(deque *a);
+void delete (deque *a, uint pid);

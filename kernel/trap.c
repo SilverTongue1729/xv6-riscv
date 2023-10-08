@@ -94,7 +94,17 @@ void usertrap(void)
         p->trapframe->epc = p->handler;
       }
     }
-#if defined RR
+#ifdef MLFQ
+    struct proc *p = myproc();
+    if (p->change_queue <= 0)
+    {
+      if (p->level + 1 != NMLFQ)
+      {
+        p->level++;
+      }
+      yield();
+    }
+#elif defined RR
     yield();
 #endif
   }
@@ -183,20 +193,8 @@ void clockintr()
   acquire(&tickslock);
   ticks++;
   update_time();
-  // for (struct proc *p = proc; p < &proc[NPROC]; p++)
-  // {
-  //   acquire(&p->lock);
-  //   if (p->state == RUNNING)
-  //   {
-  //     printf("here");
-  //     p->rtime++;
-  //   }
-  //   // if (p->state == SLEEPING)
-  //   // {
-  //   //   p->wtime++;
-  //   // }
-  //   release(&p->lock);
-  // }
+  if (myproc() != 0)
+    myproc()->change_queue--;
   wakeup(&ticks);
   release(&tickslock);
 }

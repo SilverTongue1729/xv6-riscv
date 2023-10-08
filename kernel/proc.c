@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+deque mlfq[NMLFQ];
 
 struct cpu cpus[NCPU];
 
@@ -126,6 +127,11 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+  
+  p->level = 0;
+  p->change_queue = 1 << p->level;
+  p->in_queue = 0;
+  p->enter_ticks = ticks;
 
   p->now_ticks = 0;
   p->sigalarm_status = 0;
@@ -175,7 +181,11 @@ freeproc(struct proc *p)
 {
   if (p->trapframe)
     kfree((void *)p->trapframe);
+  if (p->alarm_trapframe)
+    kfree((void *)p->alarm_trapframe);
+    
   p->trapframe = 0;
+  p->alarm_trapframe = 0;
   if (p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
@@ -519,6 +529,79 @@ void scheduler(void)
       p->state = RUNNING;
       c->proc = p;
       swtch(&c->context, &p->context);
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      release(&p->lock);
+    }
+#elif defined MLFQ
+    for (struct proc *p = proc; p < &proc[NPROC]; p++)
+    {
+      if (p->state == RUNNABLE && ticks - p->enter_ticks >= AGETICK)
+      {
+        if (p->in_queue)
+        {
+          delete (&mlfq[p->level], p->pid);
+          p->in_queue = 0;
+        }
+        if (p->level)
+          p->level--;
+        p->enter_ticks = ticks;
+      }
+    }
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      if (p->state == RUNNABLE && !p->in_queue)
+      {
+        pushback(&mlfq[p->level], p);
+        p->in_queue = 1;
+      }
+    }
+    int flag = 0;
+    for (int level = 0; level < NMLFQ; level++)
+    {
+      while (size(&mlfq[level]))
+      {
+        p = front(&mlfq[level]);
+        popfront(&mlfq[p->level]);
+        p->in_queue = 0;
+        if (p->state == RUNNABLE)
+        {
+          p->enter_ticks = ticks;
+          flag = 1;
+          break;
+        }
+      }
+      if (flag)
+        break;
+    }
+    if (p->state == RUNNABLE)
+    {
+      //  --------
+      //  FOR GRAPHING
+      // for (int level = 0; level < NMLFQ; level++)
+      // {
+      //   printf("%d %d ",ticks, level);
+      //   for (int z = 0; z < mlfq[level].end; z++)
+      //   {
+      //     printf("%d ", (mlfq[level].n)[z]->pid);
+      //   }
+      //   printf("\n");
+      // }
+      // printf("\n");
+      // --------
+
+      // Switch to chosen process.  It is the process's job
+      // to release its lock and then reacquire it
+      // before jumping back to us.
+      acquire(&p->lock);
+      p->change_queue = 1 << p->level;
+
+      p->state = RUNNING;
+      p->enter_ticks = ticks;
+      c->proc = p;
+      swtch(&c->context, &p->context);
+
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
