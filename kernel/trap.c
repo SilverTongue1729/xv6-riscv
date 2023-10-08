@@ -94,7 +94,9 @@ void usertrap(void)
         p->trapframe->epc = p->handler;
       }
     }
+#if defined RR
     yield();
+#endif
   }
 
   usertrapret();

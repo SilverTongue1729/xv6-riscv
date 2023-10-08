@@ -4,7 +4,13 @@
 #include "kernel/fcntl.h"
 
 #define NFORK 10
+
+#ifdef FCFS
 #define IO 5
+#else
+#define IO 5
+#endif
+
 
 int main()
 {
@@ -28,7 +34,8 @@ int main()
         {
         } // CPU bound process
       }
-      // printf("Process %d finished\n", n);
+      printf("Process %d finished\n", n);
+      // printf("%d", n);
       exit(0);
     }
   }

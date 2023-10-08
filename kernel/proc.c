@@ -158,7 +158,11 @@ found:
   p->context.sp = p->kstack + PGSIZE;
   p->rtime = 0;
   p->etime = 0;
-  p->ctime = ticks;
+  
+  acquire(&tickslock);
+  uint temp = ticks;
+  release(&tickslock);
+  p->ctime = temp;
   
   return p;
 }
@@ -476,7 +480,51 @@ void scheduler(void)
   {
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
+#if defined FCFS
+    struct proc *next_process = 0;
 
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE)
+      {
+        next_process = p;
+        break;
+      }
+    }
+    for (p++; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE && next_process->ctime > p->ctime)
+      {
+        next_process = p;
+        continue;
+      }
+    }
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      if (p != next_process)
+      {
+        release(&p->lock);
+      }
+    }
+    p = next_process;
+    if (next_process != 0)
+    {
+      // printf("%d ", p->pid);
+      // printf("%d\n", p->pid);
+      // Switch to chosen process.  It is the process's job
+      // to release its lock and then reacquire it
+      // before jumping back to us.
+      p->state = RUNNING;
+      c->proc = p;
+      swtch(&c->context, &p->context);
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      c->proc = 0;
+      release(&p->lock);
+    }
+#elif defined RR
     for (p = proc; p < &proc[NPROC]; p++)
     {
       acquire(&p->lock);
@@ -495,6 +543,7 @@ void scheduler(void)
       }
       release(&p->lock);
     }
+#endif
   }
 }
 
