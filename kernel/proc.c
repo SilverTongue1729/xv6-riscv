@@ -817,36 +817,47 @@ int either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
-void procdump(void)
-{
-  // static char *states[] = {
-  //     [UNUSED] "unused",
-  //     [USED] "used",
-  //     [SLEEPING] "sleep ",
-  //     [RUNNABLE] "runble",
-  //     [RUNNING] "run   ",
-  //     [ZOMBIE] "zombie"};
-  struct proc *p;
-  // char *state;
+// void procdump(void)
+// {
+//   static char *states[] = {
+//       [UNUSED] "unused",
+//       [USED] "used",
+//       [SLEEPING] "sleep ",
+//       [RUNNABLE] "runble",
+//       [RUNNING] "run   ",
+//       [ZOMBIE] "zombie"};
+//   struct proc *p;
+//   char *state;
 
+//   for (p = proc; p < &proc[NPROC]; p++)
+//   {
+//     if (p->state == UNUSED)
+//       continue;
+//     if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
+//       state = states[p->state];
+//     else
+//       state = "???";
+//     printf("%d %s %s", p->pid, state, p->name);
+//     printf("\n");
+//   }
+// }
+
+void procdump(void){
+  struct proc *p;
   int cnt=0;
   int arr[NPROC][2];
+  
   for (p = proc; p < &proc[NPROC]; p++)
   {
     if (p->pid == 1 || p->pid == 2 || p->pid == 3)  // don't print init, sh or parent process 
       continue;
     if (p->state == UNUSED)
       continue;
-    // if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
-    //   state = states[p->state];
-    // else
-    //   state = "???";
-    // printf("\n");
     arr[cnt][0] = p->pid-3;
     arr[cnt][1] = p->level;
     cnt++;
   }
-  if (cnt==10) {
+  if (cnt) {
     printf("%d: ", ticks);
     for (int i = 0; i < cnt; i++)
       printf("%d %d, ", arr[i][0], arr[i][1]);
