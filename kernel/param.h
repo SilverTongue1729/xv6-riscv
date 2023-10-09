@@ -11,5 +11,5 @@
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 #define FSSIZE       2000  // size of file system in blocks
 #define MAXPATH      128   // maximum file path name
-#define NMLFQ 5
+#define NMLFQ 4
 #define AGETICK 30

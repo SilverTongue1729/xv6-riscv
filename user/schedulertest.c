@@ -34,8 +34,7 @@ int main()
         {
         } // CPU bound process
       }
-      printf("Process %d finished\n", n);
-      // printf("%d", n);
+      printf("Process %d finished\n", n);  // Remove this for MLFQ Graph
       exit(0);
     }
   }

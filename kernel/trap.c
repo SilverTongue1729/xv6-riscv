@@ -197,6 +197,7 @@ void clockintr()
     myproc()->change_queue--;
   wakeup(&ticks);
   release(&tickslock);
+  procdump();
 }
 
 // check if it's an external interrupt or software interrupt,
