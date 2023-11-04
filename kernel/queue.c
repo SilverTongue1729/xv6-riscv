@@ -6,7 +6,7 @@
 #include "proc.h"
 #include "defs.h"
 
-void popfront(deque *a)
+void popfront(queue *a)
 {
     for (int i = 0; i < a->end - 1; i++)
     {
@@ -15,7 +15,7 @@ void popfront(deque *a)
     a->end--;
     return;
 }
-void pushback(deque *a, struct proc *x)
+void pushback(queue *a, struct proc *x)
 {
     if (a->end == NPROC)
     {
@@ -26,7 +26,7 @@ void pushback(deque *a, struct proc *x)
     a->end++;
     return;
 }
-struct proc *front(deque *a)
+struct proc *front(queue *a)
 {
     if (a->end == 0)
     {
@@ -34,11 +34,11 @@ struct proc *front(deque *a)
     }
     return a->n[0];
 }
-int size(deque *a)
+int size(queue *a)
 {
     return a->end;
 }
-void delete (deque *a, uint pid)
+void delete (queue *a, uint pid)
 {
     int flag = 0;
     for (int i = 0; i < a->end; i++)

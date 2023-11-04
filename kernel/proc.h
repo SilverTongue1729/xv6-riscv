@@ -138,9 +138,9 @@ typedef struct
 {
   struct proc *n[NPROC];
   uint end;
-} deque;
-void popfront(deque *a);
-void pushback(deque *a, struct proc *x);
-struct proc *front(deque *a);
-int size(deque *a);
-void delete (deque *a, uint pid);
+} queue;
+void popfront(queue *a);
+void pushback(queue *a, struct proc *x);
+struct proc *front(queue *a);
+int size(queue *a);
+void delete (queue *a, uint pid);

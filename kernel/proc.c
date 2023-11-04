@@ -5,7 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
-deque mlfq[NMLFQ];
+queue mlfq[NMLFQ];
 
 struct cpu cpus[NCPU];
 
@@ -522,13 +522,14 @@ void scheduler(void)
     if (next_process != 0)
     {
       // printf("%d ", p->pid);
-      // printf("%d\n", p->pid);
       // Switch to chosen process.  It is the process's job
       // to release its lock and then reacquire it
       // before jumping back to us.
       p->state = RUNNING;
       c->proc = p;
+      // if (pid!=1 && pid != 2) printf("pid %d acquired\n", p->pid);
       swtch(&c->context, &p->context);
+      // if (pid!=1 && pid != 2) printf("pid %d released\n", p->pid);
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
@@ -817,53 +818,59 @@ int either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
-// void procdump(void)
-// {
-//   static char *states[] = {
-//       [UNUSED] "unused",
-//       [USED] "used",
-//       [SLEEPING] "sleep ",
-//       [RUNNABLE] "runble",
-//       [RUNNING] "run   ",
-//       [ZOMBIE] "zombie"};
-//   struct proc *p;
-//   char *state;
-
-//   for (p = proc; p < &proc[NPROC]; p++)
-//   {
-//     if (p->state == UNUSED)
-//       continue;
-//     if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
-//       state = states[p->state];
-//     else
-//       state = "???";
-//     printf("%d %s %s", p->pid, state, p->name);
-//     printf("\n");
-//   }
-// }
-
-void procdump(void){
+void procdump(void)
+{
+  static char *states[] = {
+      [UNUSED] "unused",
+      [USED] "used",
+      [SLEEPING] "sleep ",
+      [RUNNABLE] "runble",
+      [RUNNING] "running",
+      [ZOMBIE] "zombie"};
   struct proc *p;
-  int cnt=0;
-  int arr[NPROC][2];
-  
+  char *state;
+
+  int flag=0;
   for (p = proc; p < &proc[NPROC]; p++)
   {
-    if (p->pid == 1 || p->pid == 2 || p->pid == 3)  // don't print init, sh or parent process 
+    if (p->pid == 1 || p->pid == 2 || p->pid==3)  // don't print init, sh or parent process 
       continue;
     if (p->state == UNUSED)
       continue;
-    arr[cnt][0] = p->pid-3;
-    arr[cnt][1] = p->level;
-    cnt++;
+    if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
+      state = states[p->state];
+    else
+      state = "???";
+    flag = 1;
+    printf("%d %s %s,  ", p->pid, state, p->name);
+    printf("ctime: %d, etime: %d, rtime: %d\n", p->ctime, p->etime, p->rtime);
+    // printf("\n");
   }
-  if (cnt) {
-    printf("%d: ", ticks);
-    for (int i = 0; i < cnt; i++)
-      printf("%d %d, ", arr[i][0], arr[i][1]);
-    printf("\n");
-  }
+  if (flag) printf("\n");
 }
+
+// void procdump(void){
+//   struct proc *p;
+//   int cnt=0;
+//   int arr[NPROC][2];
+  
+//   for (p = proc; p < &proc[NPROC]; p++)
+//   {
+//     if (p->pid == 1 || p->pid == 2 || p->pid == 3)  // don't print init, sh or parent process 
+//       continue;
+//     if (p->state == UNUSED)
+//       continue;
+//     arr[cnt][0] = p->pid-3;
+//     arr[cnt][1] = p->level;
+//     cnt++;
+//   }
+//   if (cnt) {
+//     printf("%d: ", ticks);
+//     for (int i = 0; i < cnt; i++)
+//       printf("%d %d, ", arr[i][0], arr[i][1]);
+//     printf("\n");
+//   }
+// }
 
 // waitx
 int waitx(uint64 addr, uint *wtime, uint *rtime)

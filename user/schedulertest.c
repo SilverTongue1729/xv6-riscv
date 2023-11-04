@@ -18,7 +18,12 @@ int main()
   int wtime, rtime;
   int twtime = 0, trtime = 0;
   for (n = 0; n < NFORK; n++)
+  // for (n = NFORK-1; n > -1; n--)
   {
+    
+    // sleep for 1 tick
+    sleep(1);
+
     pid = fork();
     if (pid < 0)
       break;
@@ -34,11 +39,13 @@ int main()
         {
         } // CPU bound process
       }
-      printf("Process %d finished\n", n);  // Remove this for MLFQ Graph
+      // printf("Process %d finished\n", n);  // Remove this for MLFQ Graph
+      printf("%d\n", n);  // Remove this for MLFQ Graph
       exit(0);
     }
   }
   for (; n > 0; n--)
+  // for (; n < NFORK-1; n++)
   {
     if (waitx(0, &wtime, &rtime) >= 0)
     {
