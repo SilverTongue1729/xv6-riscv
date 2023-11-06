@@ -126,6 +126,15 @@ struct proc
   uint change_queue;           // time remaining in current queue
   uint enter_ticks;            // time when process entered the queue
   
+  uint number_of_times_scheduled;
+  uint static_priority;
+  uint sleep_start;
+  uint wait_start;
+  uint reset_rbi;
+  uint sleeping_ticks;
+  uint running_ticks;
+  uint waiting_ticks;
+  
   uint64 handler;
   int interval;                      // to store the value passed by syscall
   int now_ticks;                     // how many ticks have passed
@@ -134,6 +143,8 @@ struct proc
 };
 
 extern struct proc proc[NPROC];
+
+int setpriority(int number, int pid);
 
 typedef struct
 {

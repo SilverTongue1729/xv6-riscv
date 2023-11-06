@@ -26,6 +26,7 @@ int waitx(int*, int* /*wtime*/, int* /*rtime*/);
 int getreadcount(void);
 int sigalarm(int ticks, void(*handler)());
 int sigreturn(void);
+int setpriority(int, int);
 
 // ulib.c
 int stat(const char*, struct stat*);

@@ -199,8 +199,10 @@ void clockintr()
   acquire(&tickslock);
   ticks++;
   update_time();
-  if (myproc() != 0)
+  if (myproc() != 0){
     myproc()->change_queue--;
+    myproc()->running_ticks++;
+  }
   wakeup(&ticks);
   release(&tickslock);
   // procdump();

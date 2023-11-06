@@ -149,3 +149,11 @@ uint64 sys_sigreturn(void) {
   usertrapret();
   return 0;
 }
+uint64 sys_setpriority(void)
+{
+  int number, piid;
+  argint(0, &number);
+  argint(1, &piid);
+  setpriority(number, piid);
+  return 0;
+}
