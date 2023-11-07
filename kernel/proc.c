@@ -546,7 +546,7 @@ void scheduler(void)
 
 #elif defined PBS
     struct proc *next_process = 0;
-    uint min = 1000;
+    uint max = 0;
     for (p = proc; p < &proc[NPROC]; p++)
     {
       acquire(&p->lock);
@@ -564,31 +564,32 @@ void scheduler(void)
                              p->waiting_ticks) /
                             (p->running_ticks + p->sleeping_ticks +
                              p->waiting_ticks + 1) *
-                            50)
+                            50);
           if (rbi < 0)
             rbi = 0;
         }
         uint dynamic_priority = p->static_priority + rbi;
         if (dynamic_priority > 100)
           dynamic_priority = 100;
+        p->dynamic_priority = dynamic_priority;
         p->reset_rbi = 0;
         p->sleeping_ticks = 0;
         p->running_ticks = 0;
         p->waiting_ticks = 0;
         if (next_process == 0)
         {
-          min = dynamic_priority;
+          max = dynamic_priority;
           next_process = p;
           continue;
         }
-        if (dynamic_priority < min)
+        if (dynamic_priority > max)
         {
           release(&next_process->lock);
           next_process = p;
-          min = dynamic_priority;
+          max = dynamic_priority;
           continue;
         }
-        else if (dynamic_priority == min)
+        else if (dynamic_priority == max)
         {
           if (p->number_of_times_scheduled < next_process->number_of_times_scheduled)
           {
@@ -903,37 +904,38 @@ int either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
-void procdump(void)
-{
-  static char *states[] = {
-      [UNUSED] "unused",
-      [USED] "used",
-      [SLEEPING] "sleep ",
-      [RUNNABLE] "runble",
-      [RUNNING] "running",
-      [ZOMBIE] "zombie"};
-  struct proc *p;
-  char *state;
+// void procdump(void)
+// {
+//   static char *states[] = {
+//       [UNUSED] "unused",
+//       [USED] "used",
+//       [SLEEPING] "sleep ",
+//       [RUNNABLE] "runble",
+//       [RUNNING] "running",
+//       [ZOMBIE] "zombie"};
+//   struct proc *p;
+//   char *state;
 
-  int flag=0;
-  for (p = proc; p < &proc[NPROC]; p++)
-  {
-    if (p->pid == 1 || p->pid == 2 || p->pid==3)  // don't print init, sh or parent process 
-      continue;
-    if (p->state == UNUSED)
-      continue;
-    if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
-      state = states[p->state];
-    else
-      state = "???";
-    flag = 1;
-    printf("%d %s %s,  ", p->pid, state, p->name);
-    printf("ctime: %d, etime: %d, rtime: %d\n", p->ctime, p->etime, p->rtime);
-    // printf("\n");
-  }
-  if (flag) printf("\n");
-}
+//   int flag=0;
+//   for (p = proc; p < &proc[NPROC]; p++)
+//   {
+//     if (p->pid == 1 || p->pid == 2 || p->pid==3)  // don't print init, sh or parent process 
+//       continue;
+//     if (p->state == UNUSED)
+//       continue;
+//     if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
+//       state = states[p->state];
+//     else
+//       state = "???";
+//     flag = 1;
+//     printf("%d %s %s,  ", p->pid, state, p->name);
+//     printf("ctime: %d, etime: %d, rtime: %d\n", p->ctime, p->etime, p->rtime);
+//     // printf("\n");
+//   }
+//   if (flag) printf("\n");
+// }
 
+// MLFQ Graph
 // void procdump(void){
 //   struct proc *p;
 //   int cnt=0;
@@ -956,6 +958,33 @@ void procdump(void)
 //     printf("\n");
 //   }
 // }
+
+// PBS Graph
+void procdump(void){
+  struct proc *p;
+  int cnt=0;
+  int arr[NPROC][3];
+  
+  for (p = proc; p < &proc[NPROC]; p++)
+  {
+    if (p->pid == 1 || p->pid == 2 || p->pid == 3)  // don't print init, sh or parent process 
+      continue;
+    if (p->state == UNUSED || p->state == ZOMBIE)
+      continue;
+    arr[cnt][0] = p->pid-3;
+    arr[cnt][1] = p->dynamic_priority;
+    arr[cnt][2] = p->running_ticks;
+    cnt++;
+  }
+  if (cnt) {
+    printf("%d: ", ticks);
+    for (int i = 0; i < cnt; i++)
+      // printf("%d %d %d, ", arr[i][0], arr[i][1], arr[i][2]);
+      printf("%d %d, ", arr[i][0], arr[i][1]);
+    printf("\n");
+  }
+}
+
 
 // waitx
 int waitx(uint64 addr, uint *wtime, uint *rtime)

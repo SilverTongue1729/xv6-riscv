@@ -128,6 +128,7 @@ struct proc
   
   uint number_of_times_scheduled;
   uint static_priority;
+  uint dynamic_priority;
   uint sleep_start;
   uint wait_start;
   uint reset_rbi;

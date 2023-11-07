@@ -22,7 +22,7 @@ int main()
   {
     
     // sleep for 1 tick
-    sleep(1); // for FCFS??
+    // sleep(1); // for FCFS??
 
     pid = fork();
     if (pid < 0)
@@ -40,12 +40,14 @@ int main()
         } // CPU bound process
       }
       // printf("Process %d finished\n", n);  // Remove this for MLFQ Graph
-      printf("%d\n", n);  // Remove this for MLFQ Graph
+      // printf("%d\n", n);  // Remove this for MLFQ Graph
       exit(0);
     }
     else {
 #ifdef PBS
+    
       setpriority(50 - IO + n, pid); // Will only matter for PBS, set lower priority for IO bound processes
+    //   setpriority(50 - IO, pid); // Will only matter for PBS, set lower priority for IO bound processes
 #endif
     }
   }

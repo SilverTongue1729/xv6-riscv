@@ -205,7 +205,7 @@ void clockintr()
   }
   wakeup(&ticks);
   release(&tickslock);
-  // procdump();
+  procdump();
 }
 
 // check if it's an external interrupt or software interrupt,
