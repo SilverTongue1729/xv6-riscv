@@ -904,36 +904,36 @@ int either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 // Print a process listing to console.  For debugging.
 // Runs when user types ^P on console.
 // No lock to avoid wedging a stuck machine further.
-// void procdump(void)
-// {
-//   static char *states[] = {
-//       [UNUSED] "unused",
-//       [USED] "used",
-//       [SLEEPING] "sleep ",
-//       [RUNNABLE] "runble",
-//       [RUNNING] "running",
-//       [ZOMBIE] "zombie"};
-//   struct proc *p;
-//   char *state;
+void procdump(void)
+{
+  static char *states[] = {
+      [UNUSED] "unused",
+      [USED] "used",
+      [SLEEPING] "sleep ",
+      [RUNNABLE] "runble",
+      [RUNNING] "running",
+      [ZOMBIE] "zombie"};
+  struct proc *p;
+  char *state;
 
-//   int flag=0;
-//   for (p = proc; p < &proc[NPROC]; p++)
-//   {
-//     if (p->pid == 1 || p->pid == 2 || p->pid==3)  // don't print init, sh or parent process 
-//       continue;
-//     if (p->state == UNUSED)
-//       continue;
-//     if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
-//       state = states[p->state];
-//     else
-//       state = "???";
-//     flag = 1;
-//     printf("%d %s %s,  ", p->pid, state, p->name);
-//     printf("ctime: %d, etime: %d, rtime: %d\n", p->ctime, p->etime, p->rtime);
-//     // printf("\n");
-//   }
-//   if (flag) printf("\n");
-// }
+  int flag=0;
+  for (p = proc; p < &proc[NPROC]; p++)
+  {
+    if (p->pid == 1 || p->pid == 2 || p->pid==3)  // don't print init, sh or parent process 
+      continue;
+    if (p->state == UNUSED)
+      continue;
+    if (p->state >= 0 && p->state < NELEM(states) && states[p->state])
+      state = states[p->state];
+    else
+      state = "???";
+    flag = 1;
+    printf("%d %s %s,  ", p->pid, state, p->name);
+    // printf("ctime: %d, etime: %d, rtime: %d\n", p->ctime, p->etime, p->rtime);
+    printf("\n");
+  }
+  if (flag) printf("\n");
+}
 
 // MLFQ Graph
 // void procdump(void){
@@ -960,30 +960,30 @@ int either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 // }
 
 // PBS Graph
-void procdump(void){
-  struct proc *p;
-  int cnt=0;
-  int arr[NPROC][3];
+// void procdump(void){
+//   struct proc *p;
+//   int cnt=0;
+//   int arr[NPROC][3];
   
-  for (p = proc; p < &proc[NPROC]; p++)
-  {
-    if (p->pid == 1 || p->pid == 2 || p->pid == 3)  // don't print init, sh or parent process 
-      continue;
-    if (p->state == UNUSED || p->state == ZOMBIE)
-      continue;
-    arr[cnt][0] = p->pid-3;
-    arr[cnt][1] = p->dynamic_priority;
-    arr[cnt][2] = p->running_ticks;
-    cnt++;
-  }
-  if (cnt) {
-    printf("%d: ", ticks);
-    for (int i = 0; i < cnt; i++)
-      // printf("%d %d %d, ", arr[i][0], arr[i][1], arr[i][2]);
-      printf("%d %d, ", arr[i][0], arr[i][1]);
-    printf("\n");
-  }
-}
+//   for (p = proc; p < &proc[NPROC]; p++)
+//   {
+//     if (p->pid == 1 || p->pid == 2 || p->pid == 3)  // don't print init, sh or parent process 
+//       continue;
+//     if (p->state == UNUSED || p->state == ZOMBIE)
+//       continue;
+//     arr[cnt][0] = p->pid-3;
+//     arr[cnt][1] = p->dynamic_priority;
+//     arr[cnt][2] = p->running_ticks;
+//     cnt++;
+//   }
+//   if (cnt) {
+//     printf("%d: ", ticks);
+//     for (int i = 0; i < cnt; i++)
+//       // printf("%d %d %d, ", arr[i][0], arr[i][1], arr[i][2]);
+//       printf("%d %d, ", arr[i][0], arr[i][1]);
+//     printf("\n");
+//   }
+// }
 
 
 // waitx

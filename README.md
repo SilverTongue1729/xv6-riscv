@@ -12,4 +12,4 @@ Implemented:
 - Scheduling algos:
   - FCFS (First Come First Serve)
   - MLFQ (Multi Level Feedback Queue) with plots
-  - PBS (Priority Based Scheduling)
+  - PBS (Priority Based Scheduling) with plots
