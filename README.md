@@ -6,10 +6,11 @@ Assignment for Operating Systems and Networks at IIIT Hyderabad.
 
 Implemented:
 
-- syscall getreadcount
-- sigalarm and sigreturn
-- copy on write fork
-- Scheduling algos:
+- System calls
+  - getreadcount
+  - sigalarm and sigreturn
+- Copy on write fork
+- Scheduling:
   - FCFS (First Come First Serve)
   - MLFQ (Multi Level Feedback Queue) with plots
   - PBS (Priority Based Scheduling) with plots
